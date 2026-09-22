@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKPD Interaktif: Determinan & Invers Matriks Ordo 2x2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX CDN for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <!-- Custom styling & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tealBrand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        creamBg: '#faf8f5',
+                        warmSand: '#f3efe6',
+                        accentAmber: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #faf8f5;
+            color: #1e293b;
+        }
+        .math-matrix-bracket {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 8px;
+        }
+        .math-matrix-bracket::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            border-left: 2.5px solid #0f766e;
+            border-top: 2.5px solid #0f766e;
+            border-bottom: 2.5px solid #0f766e;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        .math-matrix-bracket::after {
+            content: "";
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 5px;
+            border-right: 2.5px solid #0f766e;
+            border-top: 2.5px solid #0f766e;
+            border-bottom: 2.5px solid #0f766e;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+        .math-equation-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col selection:bg-tealBrand-200">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-tealBrand-600 flex items-center justify-center text-white font-bold font-heading text-xl shadow-md">
+                    $\mathbf{M}$
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-stone-800 text-lg leading-tight">LKPD Interaktif Matriks</h1>
+                    <p class="text-xs text-stone-500">Determinan & Invers Ordo 2×2 • Matematika SMA Kelas XI</p>
+                </div>
+            </div>
+
+            <!-- Group Badge & Storage Actions -->
+            <div id="headerGroupBadge" class="hidden flex items-center space-x-2 bg-stone-100 rounded-full px-3 py-1.5 border border-stone-200">
+                <i class="fa-solid font-bold fa-users text-tealBrand-600 text-sm"></i>
+                <span id="displayGroupName" class="text-xs font-semibold text-stone-700">Kelompok: -</span>
+                <span class="text-stone-300">|</span>
+                <button onclick="saveProgressToStorage()" title="Simpan Pekerjaan" class="text-xs font-medium text-tealBrand-700 hover:text-tealBrand-900 transition flex items-center gap-1">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ================= PAGE 1: GROUP IDENTITIES MODAL / VIEW ================= -->
+        <section id="viewGroupIdentity" class="max-w-2xl mx-auto my-6 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-stone-200">
+            <div class="text-center mb-8">
+                <span class="inline-block px-3 py-1 bg-tealBrand-100 text-tealBrand-800 rounded-full text-xs font-bold tracking-wide uppercase mb-3">
+                    Lembar Kerja Peserta Didik Digital
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-stone-800">Determinan & Invers Matriks Ordo 2×2</h2>
+                <p class="text-stone-600 text-sm mt-2">Silakan isi identitas kelompok kalian sebelum memulai diskusi dan misi penyelesaian masalah.</p>
+            </div>
+
+            <form id="formGroupIdentity" onsubmit="submitGroupIdentity(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nama Kelompok / No. Kelompok</label>
+                    <input type="text" id="inputGroupName" required placeholder="Contoh: Kelompok 3 (Gauss)" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-tealBrand-500 focus:border-tealBrand-500 transition text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nama Anggota Kelompok</label>
+                    <div id="membersContainer" class="space-y-2">
+                        <input type="text" required placeholder="Anggota 1 (Ketua)" class="member-input w-full px-4 py-2 rounded-xl border border-stone-300 text-sm">
+                        <input type="text" placeholder="Anggota 2" class="member-input w-full px-4 py-2 rounded-xl border border-stone-300 text-sm">
+                    </div>
+                    <button type="button" onclick="addMemberInput()" class="mt-2 text-xs font-semibold text-tealBrand-600 hover:text-tealBrand-800 flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Tambah Anggota
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nama Guru Pembimbing</label>
+                    <input type="text" id="inputTeacherName" required placeholder="Contoh: Ibu Rahmawati, S.Pd." class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-tealBrand-500 focus:border-tealBrand-500 transition text-sm">
+                </div>
+
+                <div class="pt-4 border-t border-stone-100 flex items-center justify-between gap-4">
+                    <button type="button" onclick="loadSavedProgress()" class="text-xs font-semibold text-stone-500 hover:text-stone-700 transition">
+                        <i class="fa-solid fa-rotate-left"></i> Lanjutkan Pekerjaan Tersimpan
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-tealBrand-600 hover:bg-tealBrand-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-tealBrand-600/20 transition flex items-center gap-2">
+                        <span>Mulai LKPD</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ================= PAGE 2: INSTRUCTIONS VIEW ================= -->
+        <section id="viewInstructions" class="hidden max-w-3xl mx-auto my-6 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-stone-200">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-heading font-bold text-stone-800">Petunjuk Pengerjaan untuk Siswa</h2>
+                    <p class="text-xs text-stone-500">Pahami aturan main sebelum memulai tantangan</p>
+                </div>
+            </div>
+
+            <div class="bg-warmSand/60 rounded-xl p-4 border border-stone-200/80 mb-6 space-y-3 text-sm text-stone-700">
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-users text-tealBrand-600 mt-0.5"></i>
+                    <p><strong>Kerjakan secara Berkelompok:</strong> Diskusikan setiap tahapan bersama seluruh anggota kelompok. Pastikan semua memahami prosesnya.</p>
+                </div>
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-pen-ruler text-tealBrand-600 mt-0.5"></i>
+                    <p><strong>Tuliskan Langkah Lengkap:</strong> LKPD ini menilai proses berpikir sistematis. Lengkapi dari pemisalan variabel, model sistem, persamaan matriks, hingga langkah hitung.</p>
+                </div>
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5"></i>
+                    <p><strong>Manfaatkan Minta Petunjuk:</strong> Jika mengalami jalan buntu, gunakan tombol <em>"Minta Petunjuk"</em> untuk memperoleh scaffolding bertahap tanpa membocorkan jawaban akhir.</p>
+                </div>
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-lock text-stone-600 mt-0.5"></i>
+                    <p><strong>Sistem Kunci Level:</strong> Kerjakan sesuai urutan. Setelah menyelesaikan level, lakukan cek jawaban lalu minta konfirmasi kode dari Guru untuk membuka level selanjutnya.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="goToDashboard()" class="px-6 py-3 bg-tealBrand-600 hover:bg-tealBrand-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center gap-2">
+                    <span>Masuk ke Dashboard Misi</span>
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: DASHBOARD & WORKSPACE ================= -->
+        <div id="viewWorkspace" class="hidden space-y-6">
+
+            <!-- Visual Level Roadmap Banner -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-stone-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-tealBrand-600 uppercase tracking-widest">Peta Kemajuan Misi</span>
+                        <h2 class="text-lg font-heading font-bold text-stone-800">Determinan & Invers Matriks</h2>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-medium text-stone-600">
+                        <span id="completedBadge" class="bg-tealBrand-100 text-tealBrand-800 px-3 py-1 rounded-full font-bold">0 / 7 Soal Tuntas</span>
+                    </div>
+                </div>
+
+                <!-- 3 Level Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Card Level 1 -->
+                    <div id="cardLevel1" onclick="switchLevel(1)" class="cursor-pointer border-2 border-tealBrand-500 bg-tealBrand-50/50 rounded-xl p-4 transition relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-tealBrand-600 text-white">LEVEL 1</span>
+                            <span id="statusIconL1" class="text-xs font-semibold text-tealBrand-700 flex items-center gap-1">
+                                🔓 Terbuka
+                            </span>
+                        </div>
+                        <h3 class="font-heading font-bold text-stone-800 text-base">Pemanasan</h3>
+                        <p class="text-xs text-stone-500 mt-1">Soal Nomor 1 – 4</p>
+                        <div class="mt-3 text-[11px] font-medium text-stone-600">
+                            Status: <span id="textStatusL1" class="font-bold text-tealBrand-700">Sedang Dikerjakan</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Level 2 -->
+                    <div id="cardLevel2" onclick="switchLevel(2)" class="cursor-not-allowed border border-stone-200 bg-stone-50 opacity-80 rounded-xl p-4 transition relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-400 text-white">LEVEL 2</span>
+                            <span id="statusIconL2" class="text-xs font-semibold text-stone-500 flex items-center gap-1">
+                                🔒 Terkunci
+                            </span>
+                        </div>
+                        <h3 class="font-heading font-bold text-stone-800 text-base">Tantangan</h3>
+                        <p class="text-xs text-stone-500 mt-1">Soal Nomor 5 – 6</p>
+                        <p class="text-[11px] text-amber-700 mt-2 italic">Selesaikan Level 1 & konfirmasi Guru untuk membuka.</p>
+                    </div>
+
+                    <!-- Card Level 3 -->
+                    <div id="cardLevel3" onclick="switchLevel(3)" class="cursor-not-allowed border border-stone-200 bg-stone-50 opacity-80 rounded-xl p-4 transition relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-stone-400 text-white">LEVEL 3</span>
+                            <span id="statusIconL3" class="text-xs font-semibold text-stone-500 flex items-center gap-1">
+                                🔒 Terkunci
+                            </span>
+                        </div>
+                        <h3 class="font-heading font-bold text-stone-800 text-base">Misi Akhir</h3>
+                        <p class="text-xs text-stone-500 mt-1">Soal Nomor 7</p>
+                        <p class="text-[11px] text-amber-700 mt-2 italic">Selesaikan Level 2 & konfirmasi Guru untuk membuka.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEVEL CONTENT CONTAINERS -->
+            <div id="levelContainer1" class="space-y-6"></div>
+            <div id="levelContainer2" class="hidden space-y-6"></div>
+            <div id="levelContainer3" class="hidden space-y-6"></div>
+
+            <!-- Level Action Footer Bar -->
+            <div class="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h4 class="font-heading font-bold text-stone-800 text-sm">Pemeriksaan Kemajuan Level <span id="currentLevelNumberText">1</span></h4>
+                    <p class="text-xs text-stone-500">Periksa seluruh isian sebelum mengajukan verifikasi ke Guru.</p>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button onclick="checkCurrentLevelWork()" class="flex-1 sm:flex-none px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>CEK PEKERJAAN</span>
+                    </button>
+                    <button id="btnTeacherConfirm" onclick="openTeacherConfirmModal()" disabled class="flex-1 sm:flex-none px-5 py-2.5 bg-stone-300 text-stone-500 font-semibold text-sm rounded-xl transition cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <span>KONFIRMASI GURU</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= PAGE 4: SUMMARY & REFLECTION VIEW ================= -->
+        <section id="viewSummary" class="hidden max-w-3xl mx-auto my-6 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-stone-200 text-center space-y-6">
+            <div class="w-16 h-16 bg-tealBrand-100 text-tealBrand-600 rounded-full flex items-center justify-center text-3xl mx-auto">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <span class="px-3 py-1 bg-tealBrand-100 text-tealBrand-800 rounded-full text-xs font-bold uppercase tracking-wide">Misi Tuntas!</span>
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-stone-800 mt-2">🎉 Selamat! Misi LKPD Selesai</h2>
+                <p class="text-stone-600 text-sm mt-1">Kelompokmu telah menyelesaikan seluruh tantangan Determinan & Invers Matriks Ordo 2×2.</p>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-left">
+                <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                    <p class="text-xs text-stone-500 font-medium">Kelompok</p>
+                    <p id="summaryGroupName" class="font-heading font-bold text-stone-800 text-base mt-0.5">-</p>
+                </div>
+                <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                    <p class="text-xs text-stone-500 font-medium">Soal Selesai</p>
+                    <p class="font-heading font-bold text-tealBrand-700 text-base mt-0.5">7 / 7 Soal</p>
+                </div>
+                <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 col-span-2 sm:col-span-1">
+                    <p class="text-xs text-stone-500 font-medium">Total Petunjuk Dipakai</p>
+                    <p id="summaryTotalHints" class="font-heading font-bold text-amber-600 text-base mt-0.5">0 Hint</p>
+                </div>
+            </div>
+
+            <!-- Reflection Form -->
+            <div class="text-left border-t border-stone-200 pt-6 space-y-4">
+                <h3 class="font-heading font-bold text-stone-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-brain text-tealBrand-600"></i> Refleksi Kelompok
+                </h3>
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">1. Konsep atau langkah mana yang paling menantang bagi kelompokmu?</label>
+                    <textarea id="reflection1" rows="2" placeholder="Tuliskan jawaban refleksi kalian..." class="w-full p-3 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-tealBrand-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">2. Strategi atau sifat matriks apa yang paling membantu menyelesaikan masalah tadi?</label>
+                    <textarea id="reflection2" rows="2" placeholder="Tuliskan jawaban refleksi kalian..." class="w-full p-3 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-tealBrand-500"></textarea>
+                </div>
+                <button onclick="saveFinalReflection()" class="w-full py-3 bg-tealBrand-600 hover:bg-tealBrand-700 text-white font-semibold text-sm rounded-xl shadow-md transition">
+                    Simpan Laporan Akhir Kelompok
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: Teacher Confirmation Code Input -->
+    <div id="modalTeacherConfirm" class="hidden fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-stone-200 space-y-4">
+            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                <h3 class="font-heading font-bold text-stone-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-user-check text-tealBrand-600"></i> Konfirmasi Guru
+                </h3>
+                <button onclick="closeTeacherConfirmModal()" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <p class="text-xs text-stone-600 leading-relaxed">
+                Tunjukkan hasil pemeriksaan pekerjaan level ini kepada Guru pembimbing kelompokmu. Masukkan kode konfirmasi yang diberikan Guru untuk membuka level berikutnya.
+            </p>
+
+            <div class="bg-stone-50 p-3 rounded-xl border border-stone-200">
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Kode Konfirmasi Guru</label>
+                <input type="text" id="inputTeacherCode" placeholder="Masukkan kode dari Guru..." class="w-full px-3 py-2 rounded-lg border border-stone-300 font-mono text-sm tracking-wider uppercase focus:ring-2 focus:ring-tealBrand-500">
+                <p id="teacherCodeError" class="hidden text-xs text-red-600 mt-1 font-semibold"></p>
+                <p class="text-[10px] text-stone-400 mt-1.5 italic">*Kode Guru: Level 1 = MATRIKS1, Level 2 = INVERS2, Level 3 = SUKSES3</p>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeTeacherConfirmModal()" class="px-4 py-2 text-stone-600 hover:bg-stone-100 text-xs font-semibold rounded-lg">Batal</button>
+                <button onclick="submitTeacherCode()" class="px-5 py-2 bg-tealBrand-600 hover:bg-tealBrand-700 text-white text-xs font-semibold rounded-lg shadow transition">
+                    BUKA LEVEL BERIKUTNYA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI TUTOR SCAFFOLDING DRAWER -->
+    <div id="aiDrawer" class="fixed right-0 top-16 bottom-0 w-full sm:w-96 bg-white border-l border-stone-200 shadow-xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <!-- Drawer Header -->
+        <div class="p-4 bg-tealBrand-700 text-white flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-tealBrand-800 flex items-center justify-center text-amber-300 font-bold">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-sm">Tutor AI Scaffolding</h3>
+                    <p class="text-[10px] text-tealBrand-200">Pembimbing Langkah & Pengingat Konsep</p>
+                </div>
+            </div>
+            <button onclick="toggleAiDrawer(false)" class="text-tealBrand-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <!-- Drawer Content Container -->
+        <div class="flex-grow p-4 overflow-y-auto custom-scrollbar space-y-4 text-xs" id="aiDrawerContent">
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-800 space-y-1">
+                <p class="font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-circle-info"></i> Prinsip Tutor Scaffolding:
+                </p>
+                <p>AI bertindak sebagai tutor pendamping. AI memberikan petunjuk terarah secara bertahap (Hint 1 → Hint 2 → Hint 3) untuk membantu kelompok menemukan konsep sendiri, bukan memberikan jawaban langsung.</p>
+            </div>
+
+            <!-- Progressive Hints Container -->
+            <div id="progressiveHintsBox" class="space-y-3"></div>
+
+            <!-- Interactive Chat Log -->
+            <div id="aiChatLog" class="space-y-3 pt-3 border-t border-stone-200"></div>
+        </div>
+
+        <!-- Drawer Input Footer -->
+        <div class="p-3 border-t border-stone-200 bg-stone-50">
+            <form onsubmit="sendAiUserMessage(event)" class="flex gap-2">
+                <input type="text" id="inputAiMessage" placeholder="Tanyakan kesulitan atau langkahmu..." class="flex-grow text-xs px-3 py-2 rounded-xl border border-stone-300 focus:ring-1 focus:ring-tealBrand-500">
+                <button type="submit" class="px-3 py-2 bg-tealBrand-600 hover:bg-tealBrand-700 text-white rounded-xl text-xs font-semibold shadow">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toggle Drawer Button (Floating) -->
+    <button onclick="toggleAiDrawer(true)" class="fixed bottom-6 right-6 z-30 px-4 py-3 bg-tealBrand-600 hover:bg-tealBrand-700 text-white font-semibold rounded-full shadow-lg flex items-center gap-2 text-xs transition">
+        <i class="fa-solid fa-lightbulb text-amber-300 text-base"></i>
+        <span>Tutor AI</span>
+    </button>
+
+    <script>
+        // Global Application State & Teacher Confirmation Codes
+        const TEACHER_CODES = {
+            1: "MATRIKS1",
+            2: "INVERS2",
+            3: "SUKSES3"
+        };
+
+        const APP_STATE = {
+            groupInfo: {
+                name: '',
+                members: [],
+                teacher: ''
+            },
+            currentLevel: 1,
+            levelStatus: {
+                1: 'in_progress',
+                2: 'locked',
+                3: 'locked'
+            },
+            activeQuestionForAi: 1,
+            hintUsage: {}
+        };
+
+        const QUESTIONS = [
+            // ---------- LEVEL 1 ----------
+            {
+                id: 1,
+                level: 1,
+                title: "Soal 1 — Kasus Pupuk Organik Cair (POC)",
+                badge: "Pemanasan",
+                story: "Pak Arhan mengolah sampah organik menjadi Pupuk Organik Cair (POC). POC dikemas dalam botol kecil dan botol besar dengan harga jual berbeda.<br><br>• Pada <strong>hari pertama</strong>, Pak Arhan menjual 3 botol kecil dan 2 botol besar dengan pendapatan <strong>Rp70.000</strong>.<br>• Pada <strong>hari kedua</strong>, ia menjual 5 botol kecil dan 4 botol besar dengan pendapatan <strong>Rp130.000</strong>.<br><br>Tentukan harga sebuah botol kecil dan sebuah botol besar!",
+                inputs: [
+                    { type: 'vars', label: 'Langkah 1 — Variabel', xLabel: 'x = harga 1 botol kecil (Rp)', yLabel: 'y = harga 1 botol besar (Rp)' },
+                    { type: 'eqs', label: 'Langkah 2 — Persamaan Linear', eq1Prefix: 'Hari 1:', eq2Prefix: 'Hari 2:' },
+                    { type: 'matrix', label: 'Langkah 3 — Persamaan Matriks' },
+                    { type: 'steps', label: 'Langkah 4 — Proses Perhitungan (Determinan / Invers)' },
+                    { type: 'final_dual', label: 'Langkah 5 — Jawaban Akhir', labelX: 'Harga 1 Botol Kecil (Rp)', labelY: 'Harga 1 Botol Besar (Rp)' }
+                ],
+                hints: [
+                    "Pertama, definisikan $x$ sebagai harga botol kecil dan $y$ sebagai harga botol besar. Bagaimana bentuk persamaan dari total penjualan hari pertama?",
+                    "Bentuk matriks dari sistem $a x + b y = p$ dan $c x + d y = q$ adalah $\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} p \\\\ q \\end{bmatrix}$. Tentukan determinan matriks koefisiennya!",
+                    "Determinan matriks $A = \\begin{bmatrix} 3 & 2 \\\\ 5 & 4 \\end{bmatrix}$ adalah $(3 \\times 4) - (2 \\times 5) = 12 - 10 = 2$. Gunakan rumus $A^{-1} = \\frac{1}{\\det(A)} \\begin{bmatrix} 4 & -2 \\\\ -5 & 3 \\end{bmatrix}$ lalu kalikan dengan vektor pendapatan!"
+                ],
+                verify: (ans) => {
+                    let isEq1 = ans.eq1 && ans.eq1.replace(/\s+/g,'').includes('3x+2y=70000');
+                    let isEq2 = ans.eq2 && ans.eq2.replace(/\s+/g,'').includes('5x+4y=130000');
+                    let isMat = ans.m11 == 3 && ans.m12 == 2 && ans.m21 == 5 && ans.m22 == 4 && ans.v1 == 70000 && ans.v2 == 130000;
+                    let isFinal = parseInt(ans.finalX) === 10000 && parseInt(ans.finalY) === 20000;
+
+                    if (isEq1 && isEq2 && isMat && isFinal) return { status: 'correct', msg: 'Sempurna! Pemodelan dan hasil perhitungan kelompokmu tepat.' };
+                    if (!isMat) return { status: 'warning', msg: 'Periksa kembali elemen-elemen matriks koefisien atau vektor pendapatannya.' };
+                    if (!isFinal) return { status: 'wrong', msg: 'Langkah akhir belum tepat. Periksa kembali perkalian invers matriks dengan pendapatan (Hitung determinan = 2).' };
+                    return { status: 'warning', msg: 'Periksa kembali penulisan persamaan linearnya.' };
+                }
+            },
+            {
+                id: 2,
+                level: 1,
+                title: "Soal 2 — Biro Perjalanan Wisata",
+                badge: "Pemanasan",
+                story: "Sebuah biro perjalanan menyiapkan kendaraan untuk wisata ke Yogyakarta dan Malang. Tersedia <strong>bus besar berkapasitas 50 penumpang</strong> dan <strong>minibus berkapasitas 20 penumpang</strong>. Biro tersebut menyewa <strong>9 kendaraan</strong> untuk mengangkut total <strong>330 peserta</strong>.<br><br>Berapa banyak bus besar dan minibus yang disewa?",
+                inputs: [
+                    { type: 'vars', label: 'Langkah 1 — Variabel', xLabel: 'x = jumlah bus besar', yLabel: 'y = jumlah minibus' },
+                    { type: 'eqs', label: 'Langkah 2 — Persamaan Linear', eq1Prefix: 'Total Kendaraan:', eq2Prefix: 'Total Penumpang:' },
+                    { type: 'matrix', label: 'Langkah 3 — Persamaan Matriks' },
+                    { type: 'steps', label: 'Langkah 4 — Proses Perhitungan' },
+                    { type: 'final_dual', label: 'Langkah 5 — Jawaban Akhir', labelX: 'Banyak Bus Besar', labelY: 'Banyak Minibus' }
+                ],
+                hints: [
+                    "Ingat, ada dua hubungan: total banyaknya kendaraan ($x + y = 9$) dan total daya tampung penumpang ($50x + 20y = 330$).",
+                    "Susun ke matriks $\\begin{bmatrix} 1 & 1 \\\\ 50 & 20 \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} 9 \\\\ 330 \\end{bmatrix}$. Hitung determinan matriks utama tersebut!",
+                    "Determinan matriks utama = $(1 \\times 20) - (1 \\times 50) = 20 - 50 = -30$. Inversnya: $\\frac{1}{-30} \\begin{bmatrix} 20 & -1 \\\\ -50 & 1 \\end{bmatrix}$. Kalikan matriks invers ini dengan $\\begin{bmatrix} 9 \\\\ 330 \\end{bmatrix}$."
+                ],
+                verify: (ans) => {
+                    let isMat = ans.m11 == 1 && ans.m12 == 1 && ans.m21 == 50 && ans.m22 == 20 && ans.v1 == 9 && ans.v2 == 330;
+                    let isFinal = parseInt(ans.finalX) === 5 && parseInt(ans.finalY) === 4;
+                    if (isMat && isFinal) return { status: 'correct', msg: 'Bagus sekali! Jumlah bus besar = 5 dan minibus = 4.' };
+                    if (!isMat) return { status: 'warning', msg: 'Periksa koefisien matriks. Baris pertama untuk jumlah unit (1, 1), baris kedua untuk kapasitas (50, 20).' };
+                    return { status: 'wrong', msg: 'Jawaban akhir belum sesuai. Coba periksa perkalian invers matriks dengan vektor [9, 330].' };
+                }
+            },
+            {
+                id: 3,
+                level: 1,
+                title: "Soal 3 — Determinan Matriks AC = B (Invers A^-1)",
+                badge: "Pemanasan",
+                story: "Diketahui $A^{-1} = \\begin{bmatrix} 2 & 5 \\\\ 1 & 2 \\end{bmatrix}$ dan $B = \\begin{bmatrix} 2 & 2 \\\\ -3 & 1 \\end{bmatrix}$.<br>Matriks $C$ memenuhi persamaan $A C = B$ (atau $C = A^{-1} B$).<br><br>Tentukan nilai determinan matriks $C$! (Gunakan sifat determinan $\\det(C) = \\det(A^{-1}) \\cdot \\det(B)$)",
+                inputs: [
+                    { type: 'text_short', id: 'detA', label: 'Langkah 1 — Determinan Matriks $A^{-1}$', placeholder: 'det(A^-1) = ...' },
+                    { type: 'text_short', id: 'detB', label: 'Langkah 2 — Determinan Matriks $B$', placeholder: 'det(B) = ...' },
+                    { type: 'steps', label: 'Langkah 3 — Proses Penyelesaian & Sifat Determinan' },
+                    { type: 'final_single', id: 'detC', label: 'Jawaban Akhir — Nilai $\\det(C)$', placeholder: 'det(C) = ...' }
+                ],
+                hints: [
+                    "Karena $A C = B$, kalikan kedua ruas kiri dengan $A^{-1}$ sehingga $C = A^{-1} B$. Maka $\\det(C) = \\det(A^{-1}) \\cdot \\det(B)$.",
+                    "Hitung determinan matriks $A^{-1}$: $\\det(A^{-1}) = (2 \\times 2) - (5 \\times 1) = 4 - 5 = -1$. Lalu hitung determinan $B$: $(2 \\times 1) - (2 \\times -3) = 8$.",
+                    "Maka $\\det(C) = \\det(A^{-1}) \\times \\det(B) = -1 \\times 8 = -8$."
+                ],
+                verify: (ans) => {
+                    let dA = parseFloat(ans.detA);
+                    let dB = parseFloat(ans.detB);
+                    let dC = parseFloat(ans.detC);
+                    if (dA === -1 && dB === 8 && dC === -8) {
+                        return { status: 'correct', msg: 'Tepat sekali! Karena C = A^-1 B, maka det(C) = det(A^-1) . det(B) = (-1) . (8) = -8.' };
+                    }
+                    if (dA !== -1) return { status: 'warning', msg: 'Periksa kembali nilai det(A^-1). Ingat ad - bc = 2(2) - 5(1).' };
+                    if (dB !== 8) return { status: 'warning', msg: 'Periksa kembali nilai det(B). Ingat 2(1) - 2(-3).' };
+                    return { status: 'wrong', msg: 'Nilai det(C) belum tepat. Gunakan hubungan det(C) = det(A^-1) * det(B).' };
+                }
+            },
+            {
+                id: 4,
+                level: 1,
+                title: "Soal 4 — Operasi Invers Matriks",
+                badge: "Pemanasan",
+                story: "Diketahui $X = \\begin{bmatrix} 1 & -3 \\\\ -1 & 4 \\end{bmatrix}$ dan $Y = \\begin{bmatrix} -4 & 2 \\\\ 3 & -2 \\end{bmatrix}$.<br><br>a) Tentukan matriks $X^{-1} + Y^{-1}$!<br>b) Apakah matriks $X^{-1} + Y^{-1}$ sama dengan matriks $(X+Y)^{-1}$? Jelaskan berdasarkan hasil perhitunganmu!",
+                inputs: [
+                    { type: 'steps', label: 'Langkah 1 — Hitung Invers $X^{-1}$ dan $Y^{-1}$' },
+                    { type: 'matrix_2x2', id: 'sumInv', label: 'Langkah 2 — Hasil Matriks $X^{-1} + Y^{-1}$' },
+                    { type: 'steps', label: 'Langkah 3 — Hitung Matriks $(X+Y)^{-1}$ untuk Pembanding' },
+                    { type: 'radio_explain', id: 'isEqual', label: 'Langkah 4 — Kesimpulan Kebenaran $X^{-1} + Y^{-1} = (X+Y)^{-1}$', options: ['SAMA', 'TIDAK SAMA'] }
+                ],
+                hints: [
+                    "Cari invers $X$: $\\det(X) = 4 - 3 = 1$, sehingga $X^{-1} = \\begin{bmatrix} 4 & 3 \\\\ 1 & 1 \\end{bmatrix}$. Lalu cari $Y^{-1}$.",
+                    "$\\det(Y) = (-4)(-2) - (2)(3) = 8 - 6 = 2$. Maka $Y^{-1} = \\frac{1}{2} \\begin{bmatrix} -2 & -2 \\\\ -3 & -4 \\end{bmatrix} = \\begin{bmatrix} -1 & -1 \\\\ -1.5 & -2 \\end{bmatrix}$.",
+                    "Jumlahkan $X^{-1} + Y^{-1}$. Untuk pembanding, hitung $X+Y = \\begin{bmatrix} -3 & -1 \\\\ 2 & 2 \\end{bmatrix}$, lalu cari $(X+Y)^{-1}$. Bandingkan kedua matriks tersebut!"
+                ],
+                verify: (ans) => {
+                    let m = ans.sumInv || {};
+                    let isInvSum = (parseFloat(m.m11) === 3) && (parseFloat(m.m12) === 2) && (parseFloat(m.m21) === -0.5) && (parseFloat(m.m22) === -1);
+                    let isOption = ans.isEqual === 'TIDAK SAMA';
+
+                    if (isInvSum && isOption) {
+                        return { status: 'correct', msg: 'Luar biasa! Secara umum sifat invers tidak berlaku distributif terhadap penjumlahan: X^-1 + Y^-1 ≠ (X+Y)^-1.' };
+                    }
+                    if (!isInvSum) return { status: 'warning', msg: 'Periksa entri X^-1 + Y^-1. Pastikan invers Y dikalikan 1/2 terlebih dahulu.' };
+                    return { status: 'wrong', msg: 'Periksa kesimpulanmu. Bandingkan entri matriks X^-1 + Y^-1 dengan (X+Y)^-1.' };
+                }
+            },
+
+            // ---------- LEVEL 2 ----------
+            {
+                id: 5,
+                level: 2,
+                title: "Soal 5 — Operasi Invers (AB^-1)^-1",
+                badge: "Tantangan",
+                story: "Tentukan matriks $(A B^{-1})^{-1}$ jika diketahui $A^{-1} = \\begin{bmatrix} 1 & 4 \\\\ 2 & 3 \\end{bmatrix}$ dan $B = \\begin{bmatrix} 5 & 1 \\\\ 1 & 3 \\end{bmatrix}$!<br><br><em>Petunjuk Sifat:</em> Gunakan sifat invers perkalian matriks $(P Q)^{-1} = Q^{-1} P^{-1}$.",
+                inputs: [
+                    { type: 'steps', label: 'Langkah 1 — Penjabaran Sifat Invers (AB^-1)^-1' },
+                    { type: 'matrix_2x2', id: 'finalMatrix5', label: 'Langkah 2 — Hasil Matriks Akhir (AB^-1)^-1' }
+                ],
+                hints: [
+                    "Gunakan sifat $(P Q)^{-1} = Q^{-1} P^{-1}$. Gantikan $P$ dengan $A$ dan $Q$ dengan $B^{-1}$.",
+                    "$(A B^{-1})^{-1} = (B^{-1})^{-1} A^{-1} = B \\cdot A^{-1}$. Jadi kamu cukup mengalikan matriks $B$ dengan matriks $A^{-1}$!",
+                    "Kalikan $B A^{-1} = \\begin{bmatrix} 5 & 1 \\\\ 1 & 3 \\end{bmatrix} \\begin{bmatrix} 1 & 4 \\\\ 2 & 3 \\end{bmatrix} = \\begin{bmatrix} 5(1)+1(2) & 5(4)+1(3) \\\\ 1(1)+3(2) & 1(4)+3(3) \\end{bmatrix}$."
+                ],
+                verify: (ans) => {
+                    let m = ans.finalMatrix5 || {};
+                    let c11 = parseFloat(m.m11) === 7;
+                    let c12 = parseFloat(m.m12) === 23;
+                    let c21 = parseFloat(m.m21) === 7;
+                    let c22 = parseFloat(m.m22) === 13;
+
+                    if (c11 && c12 && c21 && c22) {
+                        return { status: 'correct', msg: 'Sangat cerdas! Dengan memanfaatkan sifat invers, kalian tidak perlu mencari invers B terlebih dahulu.' };
+                    }
+                    return { status: 'wrong', msg: 'Periksa perkalian matriks B x A^-1. Ingat perkalian matriks adalah Baris x Kolom.' };
+                }
+            },
+            {
+                id: 6,
+                level: 2,
+                title: "Soal 6 — Pengrajin Anyaman (Kontekstual)",
+                badge: "Tantangan",
+                story: "Seorang pengrajin anyaman memproduksi <strong>Tas Anyam</strong> dan <strong>Topi Anyam</strong>.<br>• Untuk membuat 1 Tas Anyam dibutuhkan waktu <strong>2 jam penyiapan bahan</strong> dan <strong>3 jam penganyaman</strong>.<br>• Untuk membuat 1 Topi Anyam dibutuhkan <strong>1 jam penyiapan bahan</strong> dan 2 jam penganyaman</strong>.<br><br>Total waktu yang tersedia minggu ini adalah <strong>14 jam penyiapan bahan</strong> dan <strong>23 jam penganyaman</strong>.<br><br><em>Klaim Pemesan:</em> Seorang pembeli mengklaim bahwa pengrajin dapat memproduksi <strong>5 Tas Anyam dan 4 Topi Anyam</strong> dari seluruh waktu yang tersedia. Periksalah apakah klaim tersebut tepat!",
+                inputs: [
+                    { type: 'vars', label: 'Langkah 1 — Variabel', xLabel: 'x = banyak Tas Anyam', yLabel: 'y = banyak Topi Anyam' },
+                    { type: 'matrix', label: 'Langkah 2 — Model Persamaan Matriks' },
+                    { type: 'steps', label: 'Langkah 3 — Hitung Invers & Jumlah Produksi (x, y)' },
+                    { type: 'radio_explain', id: 'claimCheck', label: 'Langkah 4 — Evaluasi Klaim Pemesan (5 Tas & 4 Topi)', options: ['KLAIM BENAR', 'KLAIM SALAH'] }
+                ],
+                hints: [
+                    "Persamaan 1 (Bahan): $2x + 1y = 14$. Persamaan 2 (Penganyaman): $3x + 2y = 23$. Susun ke bentuk matriks!",
+                    "Determinan matriks $\\begin{bmatrix} 2 & 1 \\\\ 3 & 2 \\end{bmatrix}$ adalah $4 - 3 = 1$. Invers matriksnya adalah $\\begin{bmatrix} 2 & -1 \\\\ -3 & 2 \\end{bmatrix}$.",
+                    "Kalikan invers tersebut dengan $\\begin{bmatrix} 14 \\\\ 23 \\end{bmatrix}$: $x = 2(14) - 1(23) = 28 - 23 = 5$, dan $y = -3(14) + 2(23) = -42 + 46 = 4$. Cocokkan dengan klaim pembeli!"
+                ],
+                verify: (ans) => {
+                    let isMat = ans.m11 == 2 && ans.m12 == 1 && ans.m21 == 3 && ans.m22 == 2 && ans.v1 == 14 && ans.v2 == 23;
+                    let isClaim = ans.claimCheck === 'KLAIM BENAR';
+
+                    if (isMat && isClaim) {
+                        return { status: 'correct', msg: 'Tepat sekali! Perhitungan invers matriks menghasilkan x=5 dan y=4, sehingga klaim pembeli BENAR.' };
+                    }
+                    if (!isMat) return { status: 'warning', msg: 'Periksa kembali susunan matriks modelnya.' };
+                    return { status: 'wrong', msg: 'Periksa hasil perkalian invers matriks dengan vektor jam kerja.' };
+                }
+            },
+
+            // ---------- LEVEL 3 ----------
+            {
+                id: 7,
+                level: 3,
+                title: "Soal 7 — Pabrik Farmasi (Misi Akhir)",
+                badge: "Misi Akhir",
+                story: "Sebuah pabrik farmasi mencampur dua bahan aktif A dan B untuk memproduksi <strong>Obat Jenis I</strong> dan <strong>Obat Jenis II</strong>.<br>• Setiap unit Obat I membutuhkan <strong>3 gram bahan A</strong> dan <strong>2 gram bahan B</strong>.<br>• Setiap unit Obat II membutuhkan <strong>4 gram bahan A</strong> dan <strong>3 gram bahan B</strong>.<br><br>Persediaan bahan aktif di gudang saat ini adalah <strong>290 gram bahan A</strong> dan <strong>210 gram bahan B</strong>.<br><br><em>Kebijakan Pabrik:</em> Pabrik menetapkan target produksi minimal <strong>30 unit Obat I</strong> dan <strong>45 unit Obat II</strong> agar mencapai efisiensi biaya. Apakah persediaan bahan aktif yang ada memenuhi kebijakan tersebut?",
+                inputs: [
+                    { type: 'vars', label: 'Langkah 1 — Variabel', xLabel: 'x = jumlah produksi Obat I', yLabel: 'y = jumlah produksi Obat II' },
+                    { type: 'matrix', label: 'Langkah 2 — Persamaan Matriks' },
+                    { type: 'steps', label: 'Langkah 3 — Penyelesaian Invers Matriks & Produksi' },
+                    { type: 'final_dual', label: 'Langkah 4 — Hasil Produksi Maksimal', labelX: 'Unit Obat I', labelY: 'Unit Obat II' },
+                    { type: 'radio_explain', id: 'policyCheck', label: 'Langkah 5 — Kesimpulan Kebijakan Efisiensi Pabrik', options: ['MEMENUHI KEBIJAKAN', 'TIDAK MEMENUHI KEBIJAKAN'] }
+                ],
+                hints: [
+                    "Bentuk matriks dari kebutuhan bahan: $\\begin{bmatrix} 3 & 4 \\\\ 2 & 3 \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} 290 \\\\ 210 \\end{bmatrix}$.",
+                    "Determinan matriks koefisien = $(3 \\times 3) - (4 \\times 2) = 9 - 8 = 1$. Adjoint sama dengan inversnya: $\\begin{bmatrix} 3 & -4 \\\\ -2 & 3 \\end{bmatrix}$.",
+                    "Hitung $x = 3(290) - 4(210) = 870 - 840 = 30$ unit Obat I. Hitung $y = -2(290) + 3(210) = -580 + 630 = 50$ unit Obat II. Bandingkan dengan target (30 Obat I, 45 Obat II)!"
+                ],
+                verify: (ans) => {
+                    let isMat = ans.m11 == 3 && ans.m12 == 4 && ans.m21 == 2 && ans.m22 == 3 && ans.v1 == 290 && ans.v2 == 210;
+                    let isFinal = parseInt(ans.finalX) === 30 && parseInt(ans.finalY) === 50;
+                    let isPolicy = ans.policyCheck === 'MEMENUHI KEBIJAKAN';
+
+                    if (isMat && isFinal && isPolicy) {
+                        return { status: 'correct', msg: 'Selamat! Misi Akhir tuntas! Jumlah produksi (30 Obat I & 50 Obat II) memenuhi kebijakan efisiensi pabrik.' };
+                    }
+                    if (!isMat) return { status: 'warning', msg: 'Periksa model matriks koefisien bahan A dan bahan B.' };
+                    if (!isFinal) return { status: 'wrong', msg: 'Periksa kembali perkalian invers matriks dengan [290, 210].' };
+                    return { status: 'wrong', msg: 'Periksa kesimpulan kebijakan. Karena hasil produksi (30 dan 50) melebihi/sama dengan target (30 dan 45), kebijakan terpenuhi.' };
+                }
+            }
+        ];
+
+        /* ==========================================================================
+           INITIALIZATION & RENDERING ENGINE
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAllQuestions();
+            updateRoadmapUI();
+        });
+
+        function addMemberInput() {
+            const container = document.getElementById('membersContainer');
+            const count = container.querySelectorAll('input').length + 1;
+            if (count > 6) return;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `Anggota ${count}`;
+            input.className = 'member-input w-full px-4 py-2 rounded-xl border border-stone-300 text-sm';
+            container.appendChild(input);
+        }
+
+        function submitGroupIdentity(e) {
+            e.preventDefault();
+            const groupName = document.getElementById('inputGroupName').value.trim();
+            const teacherName = document.getElementById('inputTeacherName').value.trim();
+            const memberInputs = document.querySelectorAll('.member-input');
+            const members = Array.from(memberInputs).map(i => i.value.trim()).filter(v => v !== '');
+
+            if (!groupName || members.length === 0 || !teacherName) {
+                alert('Mohon lengkapi nama kelompok, minimal 1 anggota, dan nama guru.');
+                return;
+            }
+
+            APP_STATE.groupInfo.name = groupName;
+            APP_STATE.groupInfo.members = members;
+            APP_STATE.groupInfo.teacher = teacherName;
+
+            document.getElementById('displayGroupName').innerText = `Kelompok: ${groupName}`;
+            document.getElementById('headerGroupBadge').classList.remove('hidden');
+
+            document.getElementById('viewGroupIdentity').classList.add('hidden');
+            document.getElementById('viewInstructions').classList.remove('hidden');
+            
+            saveProgressToStorage();
+        }
+
+        function goToDashboard() {
+            document.getElementById('viewInstructions').classList.add('hidden');
+            document.getElementById('viewWorkspace').classList.remove('hidden');
+            switchLevel(1);
+        }
+
+        /* ==========================================================================
+           QUESTION DOM BUILDER
+           ========================================================================== */
+        function renderAllQuestions() {
+            QUESTIONS.forEach(q => {
+                const container = document.getElementById(`levelContainer${q.level}`);
+                if (!container) return;
+
+                const qCard = document.createElement('div');
+                qCard.id = `questionCard_${q.id}`;
+                qCard.className = "bg-white rounded-2xl p-6 shadow-sm border border-stone-200 space-y-5 relative";
+
+                let html = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-100 pb-4 gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 bg-tealBrand-100 text-tealBrand-800 rounded-md text-xs font-bold uppercase tracking-wider">${q.badge}</span>
+                            <h3 class="font-heading font-bold text-stone-800 text-lg">${q.title}</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="badgeStatus_q${q.id}" class="text-xs font-semibold text-stone-400 bg-stone-100 px-2.5 py-1 rounded-full">
+                                ⚪ Belum Dikerjakan
+                            </span>
+                            <button onclick="requestHintForQuestion(${q.id})" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span>MINTA PETUNJUK</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cerita Soal -->
+                    <div class="bg-warmSand/50 rounded-xl p-4 border border-stone-200/70 text-sm text-stone-800 leading-relaxed">
+                        ${q.story}
+                    </div>
+
+                    <!-- Form Input Berjenjang Format Equation -->
+                    <div id="inputGroup_q${q.id}" class="space-y-4 pt-2">
+                `;
+
+                // Render Input Components with Equation Layout
+                q.inputs.forEach((inp, idx) => {
+                    html += `<div class="p-4 bg-stone-50/70 rounded-xl border border-stone-200/80 space-y-3">
+                        <label class="block text-xs font-bold text-tealBrand-800 uppercase tracking-wider">${inp.label}</label>`;
+
+                    if (inp.type === 'vars') {
+                        html += `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div class="bg-white p-2.5 rounded-lg border border-stone-200 flex items-center gap-2">
+                                    <span class="font-bold text-tealBrand-700">$x$:</span>
+                                    <span class="font-semibold text-stone-600">${inp.xLabel.replace('x = ', '')}</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-stone-200 flex items-center gap-2">
+                                    <span class="font-bold text-tealBrand-700">$y$:</span>
+                                    <span class="font-semibold text-stone-600">${inp.yLabel.replace('y = ', '')}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else if (inp.type === 'eqs') {
+                        html += `
+                            <div class="space-y-2 text-xs">
+                                <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-stone-200">
+                                    <span class="w-32 font-bold text-stone-700">${inp.eq1Prefix}</span>
+                                    <input type="text" id="q${q.id}_eq1" placeholder="Contoh: 2x + y = 50000" class="flex-grow px-3 py-1.5 rounded-lg border border-stone-300 font-mono focus:ring-1 focus:ring-tealBrand-500">
+                                </div>
+                                <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-stone-200">
+                                    <span class="w-32 font-bold text-stone-700">${inp.eq2Prefix}</span>
+                                    <input type="text" id="q${q.id}_eq2" placeholder="Contoh: 4x + 3y = 120000" class="flex-grow px-3 py-1.5 rounded-lg border border-stone-300 font-mono focus:ring-1 focus:ring-tealBrand-500">
+                                </div>
+                            </div>
+                        `;
+                    } else if (inp.type === 'matrix') {
+                        html += `
+                            <div class="math-equation-box flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm">
+                                <span class="font-bold text-stone-600">Bentuk Persamaan Matriks:</span>
+                                
+                                <!-- Matriks Koefisien 2x2 -->
+                                <div class="math-matrix-bracket">
+                                    <div class="grid grid-cols-2 gap-2 w-28 p-1">
+                                        <input type="number" id="q${q.id}_m11" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800 focus:border-tealBrand-500" placeholder="a">
+                                        <input type="number" id="q${q.id}_m12" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800 focus:border-tealBrand-500" placeholder="b">
+                                        <input type="number" id="q${q.id}_m21" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800 focus:border-tealBrand-500" placeholder="c">
+                                        <input type="number" id="q${q.id}_m22" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800 focus:border-tealBrand-500" placeholder="d">
+                                    </div>
+                                </div>
+
+                                <!-- Vektor Variabel -->
+                                <div class="math-matrix-bracket">
+                                    <div class="flex flex-col gap-2 w-8 py-1 text-center font-bold text-stone-800">
+                                        <span>$x$</span>
+                                        <span>$y$</span>
+                                    </div>
+                                </div>
+
+                                <span class="text-lg font-bold text-stone-700">=</span>
+
+                                <!-- Vektor Konstanta -->
+                                <div class="math-matrix-bracket">
+                                    <div class="flex flex-col gap-2 w-24 p-1">
+                                        <input type="number" id="q${q.id}_v1" class="text-center py-1.5 border border-stone-300 rounded font-bold text-stone-800 focus:border-tealBrand-500" placeholder="p">
+                                        <input type="number" id="q${q.id}_v2" class="text-center py-1.5 border border-stone-300 rounded font-bold text-stone-800 focus:border-tealBrand-500" placeholder="q">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (inp.type === 'steps') {
+                        html += `
+                            <div class="space-y-1">
+                                <textarea id="q${q.id}_steps_${idx}" rows="3" placeholder="Tuliskan penjabaran rumus / perkalian matriks / nilai determinan di sini..." class="w-full p-2.5 text-xs font-mono rounded-lg border border-stone-300 focus:ring-1 focus:ring-tealBrand-500"></textarea>
+                            </div>
+                        `;
+                    } else if (inp.type === 'final_dual') {
+                        html += `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div class="bg-white p-3 rounded-xl border border-stone-200">
+                                    <label class="block font-bold text-stone-700 mb-1">$x = $ ${inp.labelX}</label>
+                                    <input type="number" id="q${q.id}_finalX" placeholder="Angka hasil akhir..." class="w-full px-3 py-2 rounded-lg border border-stone-300 font-bold text-tealBrand-800 text-sm">
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-stone-200">
+                                    <label class="block font-bold text-stone-700 mb-1">$y = $ ${inp.labelY}</label>
+                                    <input type="number" id="q${q.id}_finalY" placeholder="Angka hasil akhir..." class="w-full px-3 py-2 rounded-lg border border-stone-300 font-bold text-tealBrand-800 text-sm">
+                                </div>
+                            </div>
+                        `;
+                    } else if (inp.type === 'text_short') {
+                        html += `
+                            <div class="bg-white p-2.5 rounded-xl border border-stone-200">
+                                <input type="text" id="q${q.id}_${inp.id}" placeholder="${inp.placeholder}" class="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-stone-300">
+                            </div>
+                        `;
+                    } else if (inp.type === 'final_single') {
+                        html += `
+                            <div class="bg-white p-2.5 rounded-xl border border-stone-200">
+                                <input type="text" id="q${q.id}_${inp.id}" placeholder="${inp.placeholder}" class="w-full px-3 py-2 text-sm font-bold text-tealBrand-800 font-mono rounded-lg border border-stone-300">
+                            </div>
+                        `;
+                    } else if (inp.type === 'matrix_2x2') {
+                        html += `
+                            <div class="math-equation-box flex items-center justify-start gap-3 text-xs">
+                                <span class="font-bold text-stone-600">Matriks Hasil:</span>
+                                <div class="math-matrix-bracket">
+                                    <div class="grid grid-cols-2 gap-2 w-36 p-1">
+                                        <input type="number" step="any" id="q${q.id}_${inp.id}_m11" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800" placeholder="a">
+                                        <input type="number" step="any" id="q${q.id}_${inp.id}_m12" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800" placeholder="b">
+                                        <input type="number" step="any" id="q${q.id}_${inp.id}_m21" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800" placeholder="c">
+                                        <input type="number" step="any" id="q${q.id}_${inp.id}_m22" class="text-center py-1.5 border border-stone-300 rounded font-bold text-tealBrand-800" placeholder="d">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (inp.type === 'radio_explain') {
+                        html += `
+                            <div class="space-y-2 text-xs">
+                                <div class="flex items-center gap-4 bg-white p-2.5 rounded-xl border border-stone-200">
+                                    ${inp.options.map(opt => `
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer font-bold text-stone-700">
+                                            <input type="radio" name="q${q.id}_${inp.id}" value="${opt}" class="text-tealBrand-600"> ${opt}
+                                        </label>
+                                    `).join('')}
+                                </div>
+                                <textarea id="q${q.id}_${inp.id}_reason" rows="2" placeholder="Tuliskan alasan matematis berdasarkan perhitungan kelompokmu..." class="w-full p-2.5 text-xs rounded-lg border border-stone-300"></textarea>
+                            </div>
+                        `;
+                    }
+
+                    html += `</div>`;
+                });
+
+                // Feedback Box per question
+                html += `
+                    </div>
+                    <div id="feedback_q${q.id}" class="hidden p-3.5 rounded-xl text-xs space-y-1"></div>
+                `;
+
+                qCard.innerHTML = html;
+                container.appendChild(qCard);
+            });
+
+            // Trigger KaTeX rendering after DOM updates
+            setTimeout(() => {
+                if (window.renderMathInElement) {
+                    renderMathInElement(document.body, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                }
+            }, 200);
+        }
+
+        /* ==========================================================================
+           LEVEL SWITCHING & LEVEL STATUS CONTROLLER
+           ========================================================================== */
+        function switchLevel(levelNum) {
+            if (APP_STATE.levelStatus[levelNum] === 'locked') {
+                alert(`Level ${levelNum} masih terkunci! Selesaikan level sebelumnya dan masukkan kode konfirmasi Guru terlebih dahulu.`);
+                return;
+            }
+
+            APP_STATE.currentLevel = levelNum;
+            document.getElementById('currentLevelNumberText').innerText = levelNum;
+
+            // Toggle visibility
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById(`levelContainer${i}`);
+                if (el) el.classList.toggle('hidden', i !== levelNum);
+            }
+
+            updateRoadmapUI();
+        }
+
+        function updateRoadmapUI() {
+            for (let lvl = 1; lvl <= 3; lvl++) {
+                const card = document.getElementById(`cardLevel${lvl}`);
+                const icon = document.getElementById(`statusIconL${lvl}`);
+                const statusTxt = document.getElementById(`textStatusL${lvl}`);
+                const status = APP_STATE.levelStatus[lvl];
+
+                if (!card) continue;
+
+                if (status === 'locked') {
+                    card.className = "cursor-not-allowed border border-stone-200 bg-stone-50 opacity-75 rounded-xl p-4 transition relative";
+                    if (icon) icon.innerHTML = "🔒 Terkunci";
+                    if (statusTxt) statusTxt.innerText = "Terkunci";
+                } else if (status === 'confirmed') {
+                    card.className = "cursor-pointer border-2 border-emerald-500 bg-emerald-50/50 rounded-xl p-4 transition relative";
+                    if (icon) icon.innerHTML = "✅ Tuntas";
+                    if (statusTxt) statusTxt.innerText = "Dikonfirmasi Guru";
+                } else {
+                    card.className = "cursor-pointer border-2 border-tealBrand-500 bg-tealBrand-50/50 rounded-xl p-4 transition relative";
+                    if (icon) icon.innerHTML = "🔓 Terbuka";
+                    if (statusTxt) statusTxt.innerText = "Sedang Dikerjakan";
+                }
+            }
+        }
+
+        /* ==========================================================================
+           CHECKING WORK ENGINE (SUBMISSION & SCAFFOLDING FEEDBACK)
+           ========================================================================== */
+        function collectQuestionAnswers(qId) {
+            const q = QUESTIONS.find(item => item.id === qId);
+            if (!q) return {};
+
+            let ans = {};
+            ans.eq1 = document.getElementById(`q${qId}_eq1`)?.value || '';
+            ans.eq2 = document.getElementById(`q${qId}_eq2`)?.value || '';
+            ans.m11 = document.getElementById(`q${qId}_m11`)?.value || '';
+            ans.m12 = document.getElementById(`q${qId}_m12`)?.value || '';
+            ans.m21 = document.getElementById(`q${qId}_m21`)?.value || '';
+            ans.m22 = document.getElementById(`q${qId}_m22`)?.value || '';
+            ans.v1 = document.getElementById(`q${qId}_v1`)?.value || '';
+            ans.v2 = document.getElementById(`q${qId}_v2`)?.value || '';
+            ans.finalX = document.getElementById(`q${qId}_finalX`)?.value || '';
+            ans.finalY = document.getElementById(`q${qId}_finalY`)?.value || '';
+
+            // Question 3 specific
+            ans.detA = document.getElementById(`q${qId}_detA`)?.value || '';
+            ans.detB = document.getElementById(`q${qId}_detB`)?.value || '';
+            ans.detC = document.getElementById(`q${qId}_detC`)?.value || '';
+
+            // Question 4 specific
+            ans.sumInv = {
+                m11: document.getElementById(`q${qId}_sumInv_m11`)?.value || '',
+                m12: document.getElementById(`q${qId}_sumInv_m12`)?.value || '',
+                m21: document.getElementById(`q${qId}_sumInv_m21`)?.value || '',
+                m22: document.getElementById(`q${qId}_sumInv_m22`)?.value || ''
+            };
+            const rEq = document.querySelector(`input[name="q${qId}_isEqual"]:checked`);
+            ans.isEqual = rEq ? rEq.value : '';
+
+            // Question 5 specific
+            ans.finalMatrix5 = {
+                m11: document.getElementById(`q${qId}_finalMatrix5_m11`)?.value || '',
+                m12: document.getElementById(`q${qId}_finalMatrix5_m12`)?.value || '',
+                m21: document.getElementById(`q${qId}_finalMatrix5_m21`)?.value || '',
+                m22: document.getElementById(`q${qId}_finalMatrix5_m22`)?.value || ''
+            };
+
+            // Question 6 specific
+            const rClaim = document.querySelector(`input[name="q${qId}_claimCheck"]:checked`);
+            ans.claimCheck = rClaim ? rClaim.value : '';
+
+            // Question 7 specific
+            const rPolicy = document.querySelector(`input[name="q${qId}_policyCheck"]:checked`);
+            ans.policyCheck = rPolicy ? rPolicy.value : '';
+
+            return ans;
+        }
+
+        function checkCurrentLevelWork() {
+            const currentLevel = APP_STATE.currentLevel;
+            const levelQuestions = QUESTIONS.filter(q => q.level === currentLevel);
+
+            let allCorrect = true;
+            let totalChecked = 0;
+
+            levelQuestions.forEach(q => {
+                const ans = collectQuestionAnswers(q.id);
+                const result = q.verify(ans);
+                const fbBox = document.getElementById(`feedback_q${q.id}`);
+                const badge = document.getElementById(`badgeStatus_q${q.id}`);
+
+                fbBox.classList.remove('hidden', 'bg-emerald-50', 'bg-amber-50', 'bg-red-50', 'text-emerald-800', 'text-amber-800', 'text-red-800', 'border-emerald-200', 'border-amber-200', 'border-red-200');
+                fbBox.classList.add('border');
+
+                if (result.status === 'correct') {
+                    fbBox.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
+                    fbBox.innerHTML = `<p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> ✅ BENAR!</p><p>${result.msg}</p>`;
+                    if (badge) badge.innerHTML = "✅ Correct";
+                } else if (result.status === 'warning') {
+                    allCorrect = false;
+                    fbBox.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-200');
+                    fbBox.innerHTML = `<p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i> ⚠️ Perlu Diperiksa Kembali</p><p>${result.msg}</p>`;
+                    if (badge) badge.innerHTML = "⚠️ Perlu Cek";
+                } else {
+                    allCorrect = false;
+                    fbBox.classList.add('bg-red-50', 'text-red-800', 'border-red-200');
+                    fbBox.innerHTML = `<p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark text-red-600"></i> ❌ Belum Tepat</p><p>${result.msg}</p>`;
+                    if (badge) badge.innerHTML = "❌ Belum Tepat";
+                }
+                totalChecked++;
+            });
+
+            const btnConfirm = document.getElementById('btnTeacherConfirm');
+
+            if (allCorrect) {
+                btnConfirm.disabled = false;
+                btnConfirm.className = "flex-1 sm:flex-none px-5 py-2.5 bg-tealBrand-600 hover:bg-tealBrand-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer";
+                alert(`🎉 MANTAP! Seluruh soal pada Level ${currentLevel} berhasil diselesaikan dengan benar.\n\nLangkah selanjutnya: Tunjukkan layar pekerjaan kelompokmu kepada Guru untuk memperoleh Kode Konfirmasi Guru.`);
+            } else {
+                btnConfirm.disabled = true;
+                btnConfirm.className = "flex-1 sm:flex-none px-5 py-2.5 bg-stone-300 text-stone-500 font-semibold text-sm rounded-xl transition cursor-not-allowed flex items-center justify-center gap-2";
+                alert(`Beberapa langkah atau jawaban pada Level ${currentLevel} masih perlu diperiksa kembali. Gunakan tombol 'MINTA PETUNJUK' pada soal yang masih keliru!`);
+            }
+
+            updateTotalCompletedBadge();
+        }
+
+        function updateTotalCompletedBadge() {
+            let count = 0;
+            QUESTIONS.forEach(q => {
+                const ans = collectQuestionAnswers(q.id);
+                if (q.verify(ans).status === 'correct') count++;
+            });
+            document.getElementById('completedBadge').innerText = `${count} / 7 Soal Tuntas`;
+        }
+
+        /* ==========================================================================
+           TEACHER CONFIRMATION MODAL & LEVEL UNLOCK SYSTEM
+           ========================================================================== */
+        function openTeacherConfirmModal() {
+            document.getElementById('modalTeacherConfirm').classList.remove('hidden');
+            document.getElementById('inputTeacherCode').value = '';
+            document.getElementById('teacherCodeError').classList.add('hidden');
+        }
+
+        function closeTeacherConfirmModal() {
+            document.getElementById('modalTeacherConfirm').classList.add('hidden');
+        }
+
+        function submitTeacherCode() {
+            const inputCode = document.getElementById('inputTeacherCode').value.trim().toUpperCase();
+            const currentLvl = APP_STATE.currentLevel;
+            const expectedCode = TEACHER_CODES[currentLvl];
+
+            if (inputCode === expectedCode) {
+                APP_STATE.levelStatus[currentLvl] = 'confirmed';
+                closeTeacherConfirmModal();
+
+                if (currentLvl < 3) {
+                    const nextLvl = currentLvl + 1;
+                    APP_STATE.levelStatus[nextLvl] = 'in_progress';
+                    alert(`✅ Konfirmasi Guru Berhasil! Level ${nextLvl} sekarang telah terbuka.`);
+                    switchLevel(nextLvl);
+                } else {
+                    // Completed Level 3 -> Go to Summary Screen
+                    alert(`🎉 LUAR BIASA! Seluruh Level LKPD telah diselesaikan dan dikonfirmasi Guru!`);
+                    showSummaryScreen();
+                }
+                saveProgressToStorage();
+            } else {
+                const err = document.getElementById('teacherCodeError');
+                err.innerText = "Kode konfirmasi belum sesuai. Silakan tanyakan kembali kepada Guru!";
+                err.classList.remove('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           AI TUTOR SCAFFOLDING DRAWER ENGINE
+           ========================================================================== */
+        function toggleAiDrawer(show) {
+            const drawer = document.getElementById('aiDrawer');
+            if (show) {
+                drawer.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function requestHintForQuestion(qId) {
+            APP_STATE.activeQuestionForAi = qId;
+            toggleAiDrawer(true);
+
+            if (!APP_STATE.hintUsage[qId]) {
+                APP_STATE.hintUsage[qId] = 0;
+            }
+
+            if (APP_STATE.hintUsage[qId] < 3) {
+                APP_STATE.hintUsage[qId]++;
+            }
+
+            renderProgressiveHints(qId);
+        }
+
+        function renderProgressiveHints(qId) {
+            const q = QUESTIONS.find(item => item.id === qId);
+            const hintsContainer = document.getElementById('progressiveHintsBox');
+            const unlockedLevel = APP_STATE.hintUsage[qId] || 0;
+
+            if (!q) return;
+
+            let html = `<div class="font-bold text-stone-800 border-b pb-1">Petunjuk Berjenjang untuk ${q.title}</div>`;
+
+            if (unlockedLevel === 0) {
+                html += `
+                    <div class="p-3 bg-stone-100 rounded-lg text-stone-600 text-center">
+                        Tekan tombol <strong>"Minta Petunjuk"</strong> pada soal untuk membuka Hint 1.
+                    </div>
+                `;
+            } else {
+                for (let i = 0; i < unlockedLevel; i++) {
+                    const hintLabels = ["Hint 1 — Pengingat Konsep", "Hint 2 — Arah Langkah", "Hint 3 — Scaffolding Spesifik"];
+                    html += `
+                        <div class="p-3 rounded-xl border bg-white space-y-1 shadow-sm">
+                            <span class="font-bold text-tealBrand-700 text-[11px] block">${hintLabels[i]}</span>
+                            <p class="text-stone-700 leading-relaxed">${q.hints[i]}</p>
+                        </div>
+                    `;
+                }
+
+                if (unlockedLevel < 3) {
+                    html += `
+                        <button onclick="requestHintForQuestion(${qId})" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-plus-circle"></i> Buka Petunjuk Berikutnya (Level ${unlockedLevel + 1})
+                        </button>
+                    `;
+                }
+            }
+
+            hintsContainer.innerHTML = html;
+
+            // Render Math in hints
+            setTimeout(() => {
+                if (window.renderMathInElement) {
+                    renderMathInElement(hintsContainer, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                }
+            }, 100);
+        }
+
+        async function sendAiUserMessage(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('inputAiMessage');
+            const userMsg = inputEl.value.trim();
+            if (!userMsg) return;
+
+            const qId = APP_STATE.activeQuestionForAi || 1;
+            const chatLog = document.getElementById('aiChatLog');
+
+            // Render User Bubble
+            const userBubble = document.createElement('div');
+            userBubble.className = "bg-tealBrand-100 text-tealBrand-900 p-2.5 rounded-xl ml-6 text-xs shadow-sm";
+            userBubble.innerText = userMsg;
+            chatLog.appendChild(userBubble);
+
+            inputEl.value = '';
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // AI Loading indicator
+            const loadingBubble = document.createElement('div');
+            loadingBubble.className = "bg-stone-100 text-stone-500 p-2.5 rounded-xl mr-6 text-xs italic flex items-center gap-2";
+            loadingBubble.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Tutor sedang memikirkan pertanyaan pemandu...`;
+            chatLog.appendChild(loadingBubble);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // Call Gemini API with Strict System Guidance
+            const aiResponseText = await queryGeminiScaffoldingTutor(qId, userMsg);
+
+            chatLog.removeChild(loadingBubble);
+
+            const aiBubble = document.createElement('div');
+            aiBubble.className = "bg-white border border-stone-200 text-stone-800 p-2.5 rounded-xl mr-6 text-xs shadow-sm space-y-1";
+            aiBubble.innerHTML = `<span class="font-bold text-tealBrand-700 block"><i class="fa-solid fa-robot"></i> Tutor AI:</span><p>${aiResponseText}</p>`;
+            chatLog.appendChild(aiBubble);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        async function queryGeminiScaffoldingTutor(qId, userQuery) {
+            const q = QUESTIONS.find(item => item.id === qId);
+            const apiKey = ""; // Runtime automatically provided by Canvas platform if empty
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const systemInstructionText = `
+Anda adalah seorang Tutor Matematika Socratic yang membimbing siswa SMA dalam mengerjakan LKPD Matriks Ordo 2x2.
+ATURAN KETAT BANTUAN:
+1. DILARANG MEMBERIKAN JAWABAN AKHIR SECARA LANGSUNG ATAU ANGKA HASIL PERHITUNGAN.
+2. DILARANG MEMBERIKAN MATRIKS INVERS HASIL AKHIR ATAU NILAI VARIABEL.
+3. DILARANG MENGATAKAN "Jawabannya adalah...".
+4. BERIKAN PERTANYAAN PEMANDU ATAU PENGINGAT RUMUS/SIFAT.
+5. Jika siswa bertanya "Jawabannya berapa?", jawablah dengan meminta siswa memeriksa langkah determinan atau rumus perkalian baris x kolom.
+Soal yang sedang dikerjakan siswa: "${q ? q.title + ': ' + q.story : 'Matriks Ordo 2x2'}"
+`;
+
+            const payload = {
+                contents: [
+                    { parts: [{ text: userQuery }] }
+                ],
+                systemInstruction: {
+                    parts: [{ text: systemInstructionText }]
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                return text || "Coba periksa kembali determinan matriks utama yang kamu gunakan. Apakah nilai $a d - b c$ sudah tepat?";
+            } catch (err) {
+                return "Coba diskusikan dengan kelompokmu: bagaimana rumus determinan dan invers untuk matriks $\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$?";
+            }
+        }
+
+        /* ==========================================================================
+           STORAGE & REFLECTION ENGINE
+           ========================================================================== */
+        function saveProgressToStorage() {
+            const dataToSave = {
+                groupInfo: APP_STATE.groupInfo,
+                currentLevel: APP_STATE.currentLevel,
+                levelStatus: APP_STATE.levelStatus,
+                hintUsage: APP_STATE.hintUsage,
+                answers: {}
+            };
+
+            QUESTIONS.forEach(q => {
+                dataToSave.answers[q.id] = collectQuestionAnswers(q.id);
+            });
+
+            localStorage.setItem('LKPD_MATRIKS_SAVE', JSON.stringify(dataToSave));
+            alert('Pekerjaan kelompok berhasil disimpan sementara di peramban!');
+        }
+
+        function loadSavedProgress() {
+            const raw = localStorage.getItem('LKPD_MATRIKS_SAVE');
+            if (!raw) {
+                alert('Belum ada data pekerjaan tersimpan di peramban ini.');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(raw);
+                APP_STATE.groupInfo = data.groupInfo || {};
+                APP_STATE.currentLevel = data.currentLevel || 1;
+                APP_STATE.levelStatus = data.levelStatus || { 1: 'in_progress', 2: 'locked', 3: 'locked' };
+                APP_STATE.hintUsage = data.hintUsage || {};
+
+                document.getElementById('displayGroupName').innerText = `Kelompok: ${APP_STATE.groupInfo.name}`;
+                document.getElementById('headerGroupBadge').classList.remove('hidden');
+
+                // Restore Input Fields
+                if (data.answers) {
+                    Object.keys(data.answers).forEach(qId => {
+                        const ans = data.answers[qId];
+                        if (document.getElementById(`q${qId}_eq1`)) document.getElementById(`q${qId}_eq1`).value = ans.eq1 || '';
+                        if (document.getElementById(`q${qId}_eq2`)) document.getElementById(`q${qId}_eq2`).value = ans.eq2 || '';
+                        if (document.getElementById(`q${qId}_m11`)) document.getElementById(`q${qId}_m11`).value = ans.m11 || '';
+                        if (document.getElementById(`q${qId}_m12`)) document.getElementById(`q${qId}_m12`).value = ans.m12 || '';
+                        if (document.getElementById(`q${qId}_m21`)) document.getElementById(`q${qId}_m21`).value = ans.m21 || '';
+                        if (document.getElementById(`q${qId}_m22`)) document.getElementById(`q${qId}_m22`).value = ans.m22 || '';
+                        if (document.getElementById(`q${qId}_v1`)) document.getElementById(`q${qId}_v1`).value = ans.v1 || '';
+                        if (document.getElementById(`q${qId}_v2`)) document.getElementById(`q${qId}_v2`).value = ans.v2 || '';
+                        if (document.getElementById(`q${qId}_finalX`)) document.getElementById(`q${qId}_finalX`).value = ans.finalX || '';
+                        if (document.getElementById(`q${qId}_finalY`)) document.getElementById(`q${qId}_finalY`).value = ans.finalY || '';
+                        if (document.getElementById(`q${qId}_detA`)) document.getElementById(`q${qId}_detA`).value = ans.detA || '';
+                        if (document.getElementById(`q${qId}_detB`)) document.getElementById(`q${qId}_detB`).value = ans.detB || '';
+                        if (document.getElementById(`q${qId}_detC`)) document.getElementById(`q${qId}_detC`).value = ans.detC || '';
+                    });
+                }
+
+                document.getElementById('viewGroupIdentity').classList.add('hidden');
+                document.getElementById('viewWorkspace').classList.remove('hidden');
+                switchLevel(APP_STATE.currentLevel);
+                alert('Pekerjaan tersimpan berhasil dimuat!');
+            } catch (e) {
+                alert('Gagal memuat data pekerjaan.');
+            }
+        }
+
+        function showSummaryScreen() {
+            document.getElementById('viewWorkspace').classList.add('hidden');
+            document.getElementById('viewSummary').classList.remove('hidden');
+
+            document.getElementById('summaryGroupName').innerText = APP_STATE.groupInfo.name || 'Kelompok';
+
+            let totalHints = 0;
+            Object.values(APP_STATE.hintUsage).forEach(count => totalHints += count);
+            document.getElementById('summaryTotalHints').innerText = `${totalHints} Hint Dipakai`;
+        }
+
+        function saveFinalReflection() {
+            const r1 = document.getElementById('reflection1').value.trim();
+            const r2 = document.getElementById('reflection2').value.trim();
+
+            if (!r1 || !r2) {
+                alert('Mohon isi kedua pertanyaan refleksi kelompok terlebih dahulu.');
+                return;
+            }
+
+            alert('🎉 Terima kasih! Laporan refleksi kelompok telah tersimpan. Tunjukkan hasil akhir ini kepada Guru!');
+        }
+    </script>
+</body>
+</html>
